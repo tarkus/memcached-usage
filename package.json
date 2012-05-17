@@ -1,0 +1,17 @@
+{
+  "author": "Tarkus Liu",
+  "name": "mema",
+  "version": "0.0.0",
+  "dependencies": {
+    "async": "*",
+    "memcached": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
