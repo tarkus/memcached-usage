@@ -1,19 +1,29 @@
-What Is This?
+# What Is This?
 -------------
 
 A tool used to help analysis memory usage of memcached instance in different scenario.
 This tool can generate values in varying size, and fill up the memcached server.
 With the usage report, you can fine tune the related settings like chunk_size, growth_factor.
 
+# Diagnosis
 
-Slabs
-=====
+## Slabs
 
 Slab is the way memcached used to allocate chunks, basically, they are visualizing memory chunks of different sizes, e.g. you request store a 100 bytes object, memcached will give you a chunk in closest size class, the size based on the settings of chunk_size and growth_factor, 
 memcached can either use a existence one or create a new one automatically.
 
-Conclusion
-----------
+## Useful Command
+stats - general information
+stats slabs - slabs class and slab usage
+stats settings - settings, can be set using options, man memcache for details
+
+## Tools
+[memcache-top](http://code.google.com/p/memcache-top/)
+
+## Reference
+[Memcached protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt)
+
+# Conclusion
 
 Given a chunk_size and growth_factor, 
 
