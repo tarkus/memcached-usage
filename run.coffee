@@ -78,6 +78,26 @@ if require.main == module
       respawn()
       next(null, "Server started")
     insert: (next) ->
-      #report = run(fixture(1024 * 800))
-      report = run([fixture(1024 * 10), fixture(1024 * 30), fixture(1024 * 100), fixture(1024 * 80), fixture(1024 * 5), fixture(1024 * 50)])
+      #report = run fixture(1024 * 800)
+
+      report = run [
+        fixture(1024 * 800)
+        fixture(1024 * 801)
+      ]
+
+      ###
+      report = run [
+        fixture(1024 * 10)
+        fixture(1024 * 30)
+        fixture(1024 * 100)
+        fixture(1024 * 80)
+        fixture(1024 * 5)
+        fixture(1024 * 50)
+        fixture(1024 * 200)
+        fixture(1024 * 400)
+        fixture(1024 * 500)
+        fixture(1024 * 600)
+        fixture(1024 * 800)
+      ]
+      ###
       next()
