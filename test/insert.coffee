@@ -7,13 +7,13 @@ describe 'Filled up the server', ->
   describe 'with fix size objects.', ->
 
     it 'small object, dynamic usage.', (done) ->
-      respawn () ->
+      respawn ->
         run fixture(1024 * 42), (report) ->
           reports["fixed_small"] = report
           done()
 
     it 'big object, low usage.', (done) ->
-      respawn () ->
+      respawn ->
         run fixture(1024 * 800), (report) ->
           reports["fixed_big"] = report
           done()
@@ -21,7 +21,7 @@ describe 'Filled up the server', ->
   describe 'with varying size objects.', ->
 
     it 'varying size less than 200KB, high usage.', (done) ->
-      respawn () ->
+      respawn ->
         run [
           fixture(1024 * 10)
           fixture(1024 * 30)
@@ -35,7 +35,7 @@ describe 'Filled up the server', ->
           done()
 
     it 'varying size in range from 200KB to 800KB, low usage.', (done) ->
-      respawn () ->
+      respawn ->
         run [
           fixture(1024 * 200)
           fixture(1024 * 400)

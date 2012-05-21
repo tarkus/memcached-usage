@@ -1,44 +1,47 @@
-# What Is This?
--------------
+# Memcache Usage
 
-A tool used to help analysis memory usage of memcached instance in different scenario.
-This tool can generate values in varying size, and fill up the memcached server.
-With the usage report, you can fine tune the related settings like chunk_size, growth_factor.
+memcache-usage is a tool can help analyzing memcached memory usage in different scenarios.
+It can start a memcached server, fill it up with varying or particular size values, and output a usage report.
+With the usage report, you can fine tune the related settings e.g. chunk_size, growth_factor.
 
-# Diagnosis
+## A Peek at Memcached's Memory Management
 
-## Slabs
+### Slabs
 
-Slab is the way memcached used to allocate chunks, basically, they are visualizing memory chunks of different sizes, e.g. you request store a 100 bytes object, memcached will give you a chunk in closest size class, the size based on the settings of chunk_size and growth_factor, 
-memcached can either use a existence one or create a new one automatically.
+Slab is the way memcached used to allocate chunks, basically, they are representing different sizes memory chunks. 
+When you request memory, memcached will calculate the chunk size based on the settings of chunk_size and growth_factor, 
+then give you whether a free chunk or create a new slab class, in closest size.
 
-## Useful Command
-stats - general information
-stats slabs - slabs class and slab usage
-stats settings - settings, can be set using options, man memcache for details
+### Useful Command
+- stats - general information
+- stats slabs - useful information dedicated on slabs class and slab usage.
+- stats settings - some settings can be set using command options, man memcached for details
 
-## Tools
-[memcache-top](http://code.google.com/p/memcache-top/)
+### Tools
 
-## Reference
+You can use [memcache-top](http://code.google.com/p/memcache-top/) to monitor memcached status.
+
+### Reference
+
 [Memcached protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt)
+
+# Analysis
+
+Set the fixture size and run through the test, I figure out, 
+
+- if only store fixed size objects, the usage are too dynamical, 
+in range from 50% up to 98%,
+it's depend on the object size, chunk_size, and growth_factor,
+the best fit object produces highest usage.
+
+- if store small objects in varying size, you can get average usage near 93%
 
 # Conclusion
 
-Given a chunk_size and growth_factor, 
+- Storing fixed size objects in memcached is very tricky.
+Doing this way, you need to carefully adjust the chunk_size and growth_factor to match the object size.
 
-if only store objects in same size, 
-before eviction, depends on the object size, 
-you can get memory usage from 50% up to 98%, 
-for the 98% usage, 
-it must be best fit, but in real world, it's not reliable, 
-e.g. if you get 98% memory usage when you filled up memcached instance with objects of 50KB, 
-you change the object size to 51KB, then you run the test again, 
-you will get much lower usage, 80% usage in my case.
+- Using memcached as a pool to store varying size objects is mature.
 
-if you store objects in varying sizes,
-you can get memory usage near 93%
-
-so, if you want to only store fixed size objects in memcached, 
-you need to carefully adjust the chunk_size and growth_factor to match the size
-otherwise, store objects in varying size.
+- Avoiding store big value into memcached. 
+Besides memcached's 1MB hard limit on object size, you need very special settings to reduce the wasted memory.

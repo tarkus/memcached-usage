@@ -73,17 +73,18 @@ run = exports.run = (values, next) ->
     cb values, next
 
 if require.main == module
-  #respawn run fixture(1024 * 800)
+  respawn -> run fixture(48)
 
   ###
-  respawn () ->
+  respawn ->
     run [
       fixture(1024 * 800)
       fixture(1024 * 801)
     ]
   ###
 
-  respawn () ->
+  ###
+  respawn ->
     run [
       fixture(1024 * 10)
       fixture(1024 * 30)
@@ -97,3 +98,4 @@ if require.main == module
       fixture(1024 * 600)
       fixture(1024 * 800)
     ]
+  ###
