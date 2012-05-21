@@ -13,9 +13,9 @@ When you request memory, memcached will calculate the chunk size based on the se
 then give you whether a free chunk or create a new slab class, in closest size.
 
 ### Useful Command
-- stats - general information
-- stats slabs - useful information dedicated on slabs class and slab usage.
-- stats settings - some settings can be set using command options, man memcached for details
+- `stats` - general information
+- `stats slabs` - useful information dedicated on slabs class and slab usage.
+- `stats settings` - some settings can be set using command options, man memcached for details
 
 ### Tools
 
@@ -25,7 +25,7 @@ You can use [memcache-top](http://code.google.com/p/memcache-top/) to monitor me
 
 [Memcached protocol](https://github.com/memcached/memcached/blob/master/doc/protocol.txt)
 
-# Analysis
+## Analysis
 
 Set the fixture size and run through the test, I figure out, 
 
@@ -36,7 +36,7 @@ the best fit object produces highest usage.
 
 - if store small objects in varying size, you can get average usage near 93%
 
-# Conclusion
+## Conclusion
 
 - Storing fixed size objects in memcached is very tricky.
 Doing this way, you need to carefully adjust the chunk_size and growth_factor to match the object size.
