@@ -1,15 +1,14 @@
 async = require 'async'
 memcached = require 'memcached'
-{exec} = require 'child_process'
+{exec, spawn, execFile} = require 'child_process'
 
 memcached_host = "127.0.0.1"
 memcached_port = 22422
 memcached_cmd = "/usr/bin/memcached -m 64 -p " + memcached_port + " -u memcache -l " + memcached_host
 
-respawn = exports.respawn = ->
-  #exec "ps aux | grep memcached | grep -v grep | grep 22422 | awk '{print $2}' | xargs kill -9", (err, stdout, stderr) ->
-  exec memcached_cmd, (err, stdout, stderr) ->
-    #console.log err if err
+respawn = exports.respawn = (next)->
+  c = execFile './memcached.sh', (err, stdout, stderr) ->
+    next() if next?
 
 fixture = exports.fixture = (length) ->
   char = ""
@@ -40,7 +39,7 @@ run = exports.run = (values, next) ->
       return setTimeout (-> cb values, next), 10 unless result
       counter += 1
       counters[value.length] = counter
-      if counter % 1000 == 0
+      if counter % 1000 == 0 and require.main == module
         console.log counter + " keys added"
       client.stats (err, result) ->
         stats = result[0]
@@ -66,38 +65,35 @@ run = exports.run = (values, next) ->
                 total_chunks: v.total_chunks
                 mem_requested: v.mem_requested
           report.active_slabs = v for k, v of slab.active_slabs
-          next(report)
+          next?(report)
 
   client.connect memcached_host + ":" + memcached_port, (err, result) ->
-    cb values, (report) ->
-      console.log report
+    unless next?
+      next = (report) -> console.log report
+    cb values, next
 
 if require.main == module
-  async.series
-    start_server: (next) ->
-      respawn()
-      next(null, "Server started")
-    insert: (next) ->
-      #report = run fixture(1024 * 800)
+  #respawn run fixture(1024 * 800)
 
-      report = run [
-        fixture(1024 * 800)
-        fixture(1024 * 801)
-      ]
+  ###
+  respawn () ->
+    run [
+      fixture(1024 * 800)
+      fixture(1024 * 801)
+    ]
+  ###
 
-      ###
-      report = run [
-        fixture(1024 * 10)
-        fixture(1024 * 30)
-        fixture(1024 * 100)
-        fixture(1024 * 80)
-        fixture(1024 * 5)
-        fixture(1024 * 50)
-        fixture(1024 * 200)
-        fixture(1024 * 400)
-        fixture(1024 * 500)
-        fixture(1024 * 600)
-        fixture(1024 * 800)
-      ]
-      ###
-      next()
+  respawn () ->
+    run [
+      fixture(1024 * 10)
+      fixture(1024 * 30)
+      fixture(1024 * 100)
+      fixture(1024 * 80)
+      fixture(1024 * 5)
+      fixture(1024 * 50)
+      fixture(1024 * 200)
+      fixture(1024 * 400)
+      fixture(1024 * 500)
+      fixture(1024 * 600)
+      fixture(1024 * 800)
+    ]
