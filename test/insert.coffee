@@ -1,4 +1,4 @@
-{scenarios} = require '../lib/memcache-usage'
+{scenarios} = require '../lib/memcached-usage'
 
 reports = {}
 

@@ -1,10 +1,10 @@
-# Memcache Usage
+# Memcached Usage
 
-memcache-usage is a tool can help analyzing memcached memory usage in various scenarios.
+memcached-usage is a tool can help analyzing memcached memory usage in various scenarios.
 
 ## How it works
 
-memcache-usage will spawn a memcached server, fill it up with varying or particular size values, and output a usage report.
+memcached-usage will spawn a memcached server, fill it up with varying or particular size values, and output a usage report.
 With the usage report, you can fine tune the related settings e.g. chunk_size, growth_factor.
 This bundle also included some test scenarios, check it out before write your own.
 
@@ -17,14 +17,21 @@ This bundle also included some test scenarios, check it out before write your ow
 ## Installation
 
 clone this repo
-`git clone git@github.com:tarkus/memcache-usage.git`
+
+```
+git clone git@github.com:tarkus/memcached-usage.git
+```
 
 install the dependencies with npm
-`cd memcache-usage`
-`npm install`
+```
+cd memcached-usage
+npm install`
+```
 
 now you are ready to run the test scenario
-`node run.js`
+```
+node run.js
+```
 
 ## A Peek at Memcached's Memory Management
 
