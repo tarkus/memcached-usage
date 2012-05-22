@@ -7,9 +7,9 @@ MEMCACHED_OPTS="-m 64 -p ${MEMCACHED_PORT} -u memcache -l ${MEMCACHED_HOST} -d"
 MEMCACHED_CMD="$MEMCACHED_BIN $MEMCACHED_OPTS"
 
 ps aux | grep memcached | grep -v grep | grep ${MEMCACHED_PORT} | awk '{print $2}' | xargs kill -9
-sleep 1
+sleep 0.1
 $MEMCACHED_CMD
-echo "Memcache test server started."
+echo "$MEMCACHED_HOST:$MEMCACHED_PORT"
 exit 0
 
 

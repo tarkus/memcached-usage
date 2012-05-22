@@ -1,8 +1,30 @@
 # Memcache Usage
 
-memcache-usage is a tool can help analyzing memcached memory usage in different scenarios.
-It can start a memcached server, fill it up with varying or particular size values, and output a usage report.
+memcache-usage is a tool can help analyzing memcached memory usage in various scenarios.
+
+## How it works
+
+memcache-usage will spawn a memcached server, fill it up with varying or particular size values, and output a usage report.
 With the usage report, you can fine tune the related settings e.g. chunk_size, growth_factor.
+This bundle also included some test scenarios, check it out before write your own.
+
+## Requirement
+
+- memcached
+- node
+- npm
+
+## Installation
+
+clone this repo
+`git clone git@github.com:tarkus/memcache-usage.git`
+
+install the dependencies with npm
+`cd memcache-usage`
+`npm install`
+
+now you are ready to run the test scenario
+`node run.js`
 
 ## A Peek at Memcached's Memory Management
 
@@ -38,10 +60,11 @@ the best fit object produces highest usage.
 
 ## Conclusion
 
-- Storing fixed size objects in memcached is very tricky.
-Doing this way, you need to carefully adjust the chunk_size and growth_factor to match the object size.
+- Storing fixed size objects in memcached is very tricky, 
+you need to carefully adjust the chunk_size and growth_factor to match the object size.
 
-- Using memcached as a pool to store varying size objects is mature.
+- Using memcached as a pool to store varying size objects is the mature way.
 
-- Avoiding store big value into memcached. 
+- Avoiding store big objects into memcached. 
 Besides memcached's 1MB hard limit on object size, you need very special settings to reduce the wasted memory.
+The usage of store big objects is much lower than store small ones.

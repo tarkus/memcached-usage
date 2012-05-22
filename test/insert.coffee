@@ -1,49 +1,53 @@
-{respawn, run, fixture} = require '../run'
+{scenarios} = require '../lib/memcache-usage'
 
 reports = {}
 
 describe 'Filled up the server', ->
 
-  describe 'with fix size objects.', ->
+  describe 'with fixed size', ->
 
-    it 'small object, dynamic usage.', (done) ->
-      respawn ->
-        run fixture(1024 * 42), (report) ->
-          reports["fixed_small"] = report
-          done()
+    it 'small objects, dynamic usage. (1)', (done) ->
+      name = "small_fixed"
+      scenarios[name] (report) ->
+        reports[name] = report
+        done()
 
-    it 'big object, low usage.', (done) ->
-      respawn ->
-        run fixture(1024 * 800), (report) ->
-          reports["fixed_big"] = report
-          done()
+    it 'small objects, dynamic usage. (2)', (done) ->
+      name = "small_fixed_2"
+      scenarios[name] (report) ->
+        report["real_usage"].should.not.equal reports["small_fixed"]["real_usage"]
+        reports[name] = report
+        done()
 
-  describe 'with varying size objects.', ->
+    it 'big objects, low usage.', (done) ->
+      name = "big_fixed"
+      scenarios[name] (report) ->
+        report["real_usage"].should.be.below reports["small_fixed"]["real_usage"]
+        reports[name] = report
+        done()
 
-    it 'varying size less than 200KB, high usage.', (done) ->
-      respawn ->
-        run [
-          fixture(1024 * 10)
-          fixture(1024 * 30)
-          fixture(1024 * 100)
-          fixture(1024 * 80)
-          fixture(1024 * 5)
-          fixture(1024 * 50)
-          fixture(1024 * 180)
-        ], (report) ->
-          reports["varying_small"] = report
-          done()
+  describe 'with varying size', ->
 
-    it 'varying size in range from 200KB to 800KB, low usage.', (done) ->
-      respawn ->
-        run [
-          fixture(1024 * 200)
-          fixture(1024 * 400)
-          fixture(1024 * 500)
-          fixture(1024 * 800)
-          fixture(1024 * 900)
-        ], (report) ->
-          reports["varying_big"] = report
-          done()
+    it 'objects less than 200KB, high usage.', (done) ->
+      name = "small_varying_3"
+      scenarios[name] (report) ->
+        report["real_usage"].should.be.above 90
+        report["server_usage"].should.be.above 90
+
+        reports[name] = report
+        done()
+
+    it 'objects in range from 200KB to 800KB, low usage.', (done) ->
+      name = "big_varying"
+      scenarios[name] (report) ->
+        report["real_usage"].should.be.below 90
+        report["server_usage"].should.be.below 90
+
+        reports[name] = report
+        done()
+
+    it 'the usage of storing bigger objects is relative lower than storing smaller ones.', (done) ->
+      reports["big_varying"]["real_usage"].should.be.below reports["small_varying_3"]["real_usage"]
+      done()
 
 

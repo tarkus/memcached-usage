@@ -1,13 +1,13 @@
 async = require 'async'
 memcached = require 'memcached'
-{exec, spawn, execFile} = require 'child_process'
+{execFile} = require 'child_process'
 
-memcached_host = "127.0.0.1"
-memcached_port = 22422
-memcached_cmd = "/usr/bin/memcached -m 64 -p " + memcached_port + " -u memcache -l " + memcached_host
+memcached_instance = ""
 
 respawn = exports.respawn = (next)->
-  c = execFile './memcached.sh', (err, stdout, stderr) ->
+  c = execFile __dirname + '/../bin/memcached.sh', (err, stdout, stderr) ->
+    return console.log err if err
+    memcached_instance = stdout.replace("\n", "")
     next() if next?
 
 fixture = exports.fixture = (length) ->
@@ -16,7 +16,7 @@ fixture = exports.fixture = (length) ->
   char
 
 run = exports.run = (values, next) ->
-  client = new memcached memcached_host + ":" + memcached_port
+  client = new memcached memcached_instance
   counters = {}
   report =
     total_items: 0
@@ -67,35 +67,104 @@ run = exports.run = (values, next) ->
           report.active_slabs = v for k, v of slab.active_slabs
           next?(report)
 
-  client.connect memcached_host + ":" + memcached_port, (err, result) ->
+  client.connect memcached_instance, (err, result) ->
     unless next?
       next = (report) -> console.log report
     cb values, next
 
+
+scenarios = exports.scenarios =
+
+  "small_fixed": (cb) ->
+    respawn ->
+      run fixture(1024 * 10), cb
+
+  "small_fixed_2": (cb) ->
+    respawn ->
+      run fixture(1024 * 42), cb
+
+  "small_fixed_3": (cb) ->
+    respawn ->
+      run fixture(1024 * 60), cb
+
+  "big_fixed": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 250)
+      ]
+      , cb
+
+  "big_fixed_2": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 500)
+      ]
+      , cb
+
+  "big_fixed_3": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 800)
+      ]
+      , cb
+
+  "small_varying": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 5)
+        fixture(1024 * 2)
+      ]
+      , cb
+
+  "small_varying_2": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 40)
+        fixture(1024 * 60)
+      ]
+      , cb
+
+  "small_varying_3": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 10)
+        fixture(1024 * 30)
+        fixture(1024 * 50)
+        fixture(1024 * 80)
+        fixture(1024 * 100)
+        fixture(1024 * 150)
+      ]
+      , cb
+
+  "big_varying": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 300)
+        fixture(1024 * 400)
+        fixture(1024 * 500)
+        fixture(1024 * 600)
+        fixture(1024 * 800)
+      ]
+      , cb
+
+  "mixed_up": (cb) ->
+    respawn ->
+      run [
+        fixture(1024 * 5)
+        fixture(1024 * 10)
+        fixture(1024 * 30)
+        fixture(1024 * 50)
+        fixture(1024 * 80)
+        fixture(1024 * 100)
+        fixture(1024 * 200)
+        fixture(1024 * 300)
+        fixture(1024 * 400)
+        fixture(1024 * 500)
+        fixture(1024 * 600)
+        fixture(1024 * 800)
+      ]
+      , cb
+
+  
 if require.main == module
-  respawn -> run fixture(48)
-
-  ###
-  respawn ->
-    run [
-      fixture(1024 * 800)
-      fixture(1024 * 801)
-    ]
-  ###
-
-  ###
-  respawn ->
-    run [
-      fixture(1024 * 10)
-      fixture(1024 * 30)
-      fixture(1024 * 100)
-      fixture(1024 * 80)
-      fixture(1024 * 5)
-      fixture(1024 * 50)
-      fixture(1024 * 200)
-      fixture(1024 * 400)
-      fixture(1024 * 500)
-      fixture(1024 * 600)
-      fixture(1024 * 800)
-    ]
-  ###
+  scenarios["small_fixed"]()
