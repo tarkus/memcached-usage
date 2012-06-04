@@ -10,9 +10,15 @@ respawn = exports.respawn = (next)->
     memcached_instance = stdout.replace("\n", "")
     next() if next?
 
-fixture = exports.fixture = (length) ->
+B = exports.B = (length) ->
   char = ""
-  char += "c" for i in [0...length]
+  char += "B" for i in [0...length]
+  char
+
+KB = exports.KB = (length) ->
+  char = kb = ""
+  kb += "K" for i in [0...1024]
+  char += kb for i in [0...length]
   char
 
 run = exports.run = (values, next) ->
@@ -76,92 +82,77 @@ run = exports.run = (values, next) ->
 scenarios = exports.scenarios =
 
   "small_fixed": (cb) ->
-    respawn ->
-      run fixture(1024 * 10), cb
+    respawn -> run [ KB 10 ], cb
 
   "small_fixed_2": (cb) ->
-    respawn ->
-      run fixture(1024 * 42), cb
+    respawn -> run [ KB 42 ], cb
 
   "small_fixed_3": (cb) ->
-    respawn ->
-      run fixture(1024 * 60), cb
+    respawn -> run [ KB 60 ], cb
 
   "big_fixed": (cb) ->
-    respawn ->
-      run [
-        fixture(1024 * 250)
-      ]
-      , cb
+    respawn -> run [ KB 250 ], cb
 
   "big_fixed_2": (cb) ->
-    respawn ->
-      run [
-        fixture(1024 * 500)
-      ]
-      , cb
+    respawn -> run [ KB 500 ], cb
 
   "big_fixed_3": (cb) ->
-    respawn ->
-      run [
-        fixture(1024 * 800)
-      ]
-      , cb
+    respawn -> run [ KB 800 ], cb
 
   "small_varying": (cb) ->
     respawn ->
       run [
-        fixture(1024 * 5)
-        fixture(1024 * 2)
+        KB 5
+        KB 2
       ]
       , cb
 
   "small_varying_2": (cb) ->
     respawn ->
       run [
-        fixture(1024 * 40)
-        fixture(1024 * 60)
+        KB 40
+        KB 60
       ]
       , cb
 
   "small_varying_3": (cb) ->
     respawn ->
       run [
-        fixture(1024 * 10)
-        fixture(1024 * 30)
-        fixture(1024 * 50)
-        fixture(1024 * 80)
-        fixture(1024 * 100)
-        fixture(1024 * 150)
+        KB 10
+        KB 30
+        KB 50
+        KB 80
+        KB 100
+        KB 150
       ]
       , cb
 
   "big_varying": (cb) ->
     respawn ->
       run [
-        fixture(1024 * 300)
-        fixture(1024 * 400)
-        fixture(1024 * 500)
-        fixture(1024 * 600)
-        fixture(1024 * 800)
+        KB 300
+        KB 400
+        KB 500
+        KB 600
+        KB 800
       ]
       , cb
 
   "mixed_up": (cb) ->
     respawn ->
       run [
-        fixture(1024 * 5)
-        fixture(1024 * 10)
-        fixture(1024 * 30)
-        fixture(1024 * 50)
-        fixture(1024 * 80)
-        fixture(1024 * 100)
-        fixture(1024 * 200)
-        fixture(1024 * 300)
-        fixture(1024 * 400)
-        fixture(1024 * 500)
-        fixture(1024 * 600)
-        fixture(1024 * 800)
+        KB 5
+        KB 10
+        KB 30
+        KB 50
+        KB 80
+        KB 100
+        KB 200
+        KB 300
+        KB 400
+        KB 500
+        KB 600
+        KB 800
       ]
       , cb
 
