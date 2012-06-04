@@ -4,7 +4,7 @@ memcached = require 'memcached'
 
 memcached_instance = ""
 
-respawn = exports.respawn = (next)->
+respawn = exports.respawn = (next) ->
   c = execFile __dirname + '/../bin/memcached.sh', (err, stdout, stderr) ->
     return console.log err if err
     memcached_instance = stdout.replace("\n", "")
@@ -22,6 +22,7 @@ KB = exports.KB = (length) ->
   char
 
 run = exports.run = (values, next) ->
+  next = (report) -> console.log report unless next?
   client = new memcached memcached_instance
   counters = {}
   report =
@@ -45,8 +46,11 @@ run = exports.run = (values, next) ->
       return setTimeout (-> cb values, next), 10 unless result
       counter += 1
       counters[value.length] = counter
-      if counter % 1000 == 0 and require.main == module
-        console.log counter + " keys added"
+      if counter % 1000 == 0
+        if require.main == module
+          console.log counter + " keys added"
+        else
+          next counter + " keys added"
       client.stats (err, result) ->
         stats = result[0]
         return cb values, next if stats.evictions < 1
@@ -71,51 +75,66 @@ run = exports.run = (values, next) ->
                 total_chunks: v.total_chunks
                 mem_requested: v.mem_requested
           report.active_slabs = v for k, v of slab.active_slabs
-          next?(report)
+          next(report)
+          console.log report
 
   client.connect memcached_instance, (err, result) ->
-    unless next?
-      next = (report) -> console.log report
+    throw err if err
     cb values, next
 
 
 scenarios = exports.scenarios =
 
-  "small_fixed": (cb) ->
-    respawn -> run [ KB 10 ], cb
+  "tiny_fixed": (reporter) ->
+    respawn -> run [ B 5 ], reporter
 
-  "small_fixed_2": (cb) ->
-    respawn -> run [ KB 42 ], cb
+  "tiny_fixed_2": (reporter) ->
+    respawn -> run [ B 20 ], reporter
 
-  "small_fixed_3": (cb) ->
-    respawn -> run [ KB 60 ], cb
+  "small_fixed": (reporter) ->
+    respawn -> run [ KB 10 ], reporter
 
-  "big_fixed": (cb) ->
-    respawn -> run [ KB 250 ], cb
+  "small_fixed_2": (reporter) ->
+    respawn -> run [ KB 42 ], reporter
 
-  "big_fixed_2": (cb) ->
-    respawn -> run [ KB 500 ], cb
+  "small_fixed_3": (reporter) ->
+    respawn -> run [ KB 60 ], reporter
 
-  "big_fixed_3": (cb) ->
-    respawn -> run [ KB 800 ], cb
+  "big_fixed": (reporter) ->
+    respawn -> run [ KB 250 ], reporter
 
-  "small_varying": (cb) ->
+  "big_fixed_2": (reporter) ->
+    respawn -> run [ KB 500 ], reporter
+
+  "big_fixed_3": (reporter) ->
+    respawn -> run [ KB 800 ], reporter
+
+  "small_varying": (reporter) ->
     respawn ->
       run [
-        KB 5
-        KB 2
+        KB 4
+        KB 8
+        KB 10
+        KB 12
+        KB 14
+        KB 16
+        KB 18
+        KB 20
+        KB 30
+        KB 40
+        KB 50
       ]
-      , cb
+      , reporter
 
-  "small_varying_2": (cb) ->
+  "small_varying_2": () ->
     respawn ->
       run [
         KB 40
         KB 60
       ]
-      , cb
+      , reporter
 
-  "small_varying_3": (cb) ->
+  "small_varying_3": (reporter) ->
     respawn ->
       run [
         KB 10
@@ -125,9 +144,9 @@ scenarios = exports.scenarios =
         KB 100
         KB 150
       ]
-      , cb
+      , reporter
 
-  "big_varying": (cb) ->
+  "big_varying": (reporter) ->
     respawn ->
       run [
         KB 300
@@ -136,9 +155,9 @@ scenarios = exports.scenarios =
         KB 600
         KB 800
       ]
-      , cb
+      , reporter
 
-  "mixed_up": (cb) ->
+  "mixed_up": (reporter) ->
     respawn ->
       run [
         KB 5
@@ -154,8 +173,10 @@ scenarios = exports.scenarios =
         KB 600
         KB 800
       ]
-      , cb
+      , reporter
 
   
 if require.main == module
-  scenarios["small_fixed"]()
+  #scenarios["small_fixed"]()
+  #scenarios["mixed_up"]()
+  scenarios["big_fixed"]( (report) -> console.log 'log:' + report )

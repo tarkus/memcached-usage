@@ -1,0 +1,20 @@
+.container
+  .page-header
+    h1 Memcached Usage
+    small a tool help analyzing memcached memory usage in various scenarios.
+
+  .row-fluid
+    .span4
+      .well
+        h3 Scenarios
+        ul.nav.nav-pills.nav-stacked
+          each func, name in runner.scenarios
+            li.scenario 
+              a(href="#", data-sname="#{name}") #{name}
+
+    .span8
+      .well
+        :markdown
+          ### Output
+        hr
+        #output(style="min-height: 400px;")

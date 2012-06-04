@@ -1,0 +1,24 @@
+!!! html
+head
+  meta(charset='utf-8')
+  meta(name='description', content='')
+  title 
+    - if (title) title += " - "
+      #{title}Memcached usage
+  // if lt IE 9
+    != js('html5shiv')
+  != js("https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+  != js('bootstrap.min')
+  != js('spine')
+  != js('spine.ajax')
+  script(src="/socket.io/socket.io.js")
+
+  != css("united")
+  != css("bootstrap-responsive.min")
+  != css('app')
+
+!= body
+
+script
+  host = '#{host}';
+!= js('app')
