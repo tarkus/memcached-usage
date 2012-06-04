@@ -25,13 +25,18 @@ git clone git@github.com:tarkus/memcached-usage.git
 install the dependencies with npm
 ```
 cd memcached-usage
-npm install`
+npm install
 ```
 
 now you are ready to run the test scenario
 ```
 node run.js
 ```
+or 
+```
+node server.js
+```
+then open it in your browser `http://localhost:4000/`
 
 ## A Peek at Memcached's Memory Management
 
