@@ -21,8 +21,9 @@ KB = exports.KB = (length) ->
   char += kb for i in [0...length]
   char
 
-run = exports.run = (values, next) ->
-  next = (report) -> console.log report unless next?
+run = exports.run = (values, reporter) ->
+  unless reporter?
+    reporter = (report) -> console.log report
   client = new memcached memcached_instance
   counters = {}
   report =
@@ -33,7 +34,7 @@ run = exports.run = (values, next) ->
     count: {}
     slabs: {}
 
-  cb = (values, next) ->
+  cb = (values, reporter) ->
     if typeof values is "object"
       value = values[Math.floor(Math.random() * values.length)]
     else if typeof values is "string"
@@ -43,17 +44,18 @@ run = exports.run = (values, next) ->
 
     key = "Test:" + value.length + ":" + (counter + 1)
     client.set key, value, 10000, (err, result) ->
-      return setTimeout (-> cb values, next), 10 unless result
+      return setTimeout (-> cb values, reporter), 10 unless result
       counter += 1
       counters[value.length] = counter
       if counter % 1000 == 0
         if require.main == module
           console.log counter + " keys added"
         else
-          next counter + " keys added"
+          reporter counter + " keys added"
       client.stats (err, result) ->
+        throw err if err
         stats = result[0]
-        return cb values, next if stats.evictions < 1
+        return cb values, reporter if stats.evictions < 1
         for length, count of counters
           report.count[length] =
             items: count
@@ -75,12 +77,12 @@ run = exports.run = (values, next) ->
                 total_chunks: v.total_chunks
                 mem_requested: v.mem_requested
           report.active_slabs = v for k, v of slab.active_slabs
-          next(report)
-          console.log report
+          reporter(report)
+          reporter('DONE')
 
   client.connect memcached_instance, (err, result) ->
     throw err if err
-    cb values, next
+    cb values, reporter
 
 
 scenarios = exports.scenarios =
@@ -126,7 +128,7 @@ scenarios = exports.scenarios =
       ]
       , reporter
 
-  "small_varying_2": () ->
+  "small_varying_2": (reporter) ->
     respawn ->
       run [
         KB 40

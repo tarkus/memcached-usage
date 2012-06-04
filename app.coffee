@@ -5,6 +5,7 @@ connections = {}
 app = express.createServer()
 
 app.use require('connect-assets')(express)
+app.use express.static __dirname + "/assets"
 app.set 'view engine', 'jade'
 
 app.helpers
@@ -23,6 +24,8 @@ io = require('socket.io').listen app
 
 io.set 'log level', 1
 io.sockets.on 'connection', (socket) ->
+
+  socket.emit 'connected', true
 
   socket.on 'run', (scenario) ->
     reporter = (report) ->

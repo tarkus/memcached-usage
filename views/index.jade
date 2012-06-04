@@ -1,5 +1,6 @@
 .container
   .page-header
+    a#top(name="top")
     h1 Memcached Usage
     small a tool help analyzing memcached memory usage in various scenarios.
 
@@ -14,7 +15,10 @@
 
     .span8
       .well
-        :markdown
-          ### Output
+        h3 Output
+        small Select scenario from left side, then you can see the output it generated.
         hr
         #output(style="min-height: 400px;")
+        a.back-to-top(href="#top")
+          i.icon-circle-arrow-up
+          | Back to top
