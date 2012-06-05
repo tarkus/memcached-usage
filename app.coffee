@@ -18,7 +18,7 @@ app.dynamicHelpers
 app.get '/', (req, res) ->
   res.render 'index', runner: runner
 
-app.listen process.env.PORT || 4000
+app.listen 4000
 
 io = require('socket.io').listen app
 
@@ -28,7 +28,12 @@ io.sockets.on 'connection', (socket) ->
   socket.emit 'connected', true
 
   socket.on 'run', (scenario) ->
-    reporter = (report) ->
-      console.log report
-      socket.emit 'output', output: report
+    reporter =
+      output: (data) ->
+        console.log data
+        socket.emit 'output', data
+      progress: (data) ->
+        console.log data
+        socket.emit 'progress', data
+
     runner.scenarios[scenario](reporter)

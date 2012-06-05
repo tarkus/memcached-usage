@@ -10,6 +10,7 @@ class MainApp extends Spine.Controller
     e.preventDefault()
     return false if not @socket.connected
     @socket.emit 'run', e.srcElement.innerHTML
+    $('#info').html("").addClass("hidden")
     $('#output').html("")
     spinner = new Spinner({
       length: 2
@@ -20,7 +21,12 @@ class MainApp extends Spine.Controller
     $('#output').append(spinner.el)
     $(s).removeClass('active') for s in @scenarios
     $(e.srcElement.parentNode).addClass('active')
-    @scrollToTop()
+    $.fx.off = true
+    $('.progress .bar').remove()
+    $('.progress').addClass("progress-info progress-striped").removeClass("progress-success progress-warning progress-danger")
+    $('.progress').append('<div class="bar"></div>')
+    $('.progress').removeClass('hidden')
+    $('body').animate scrollTop: $('.output-header').offset().top + 'px', 400
 
   scrollToTop: ->
     offset = $("#top").offset().top
@@ -35,12 +41,29 @@ $ ->
 
   socket.on 'output', (data) ->
     p = document.createElement('p')
-    return $('.spinner').remove() if data.output is 'DONE'
-    if typeof data.output is 'string'
-      line = "<pre>" + data.output + "</pre>"
-    else if typeof data.output is 'object'
-      line = "<pre class='prettyprint'>" + JSON.stringify(data.output, null, 2) + "</pre>"
-    $('.spinner').before(line)
-    $('body').animate scrollTop: $(p).offset().top - 100 + 'px', 400
+    if typeof data is 'string'
+      $('#info').removeClass("hidden")
+      $("#info").html("<pre>" + data + "</pre>")
+    else if typeof data is 'object'
+      setTimeout ->
+        if data.real_usage > 90
+          $('.progress').addClass("progress-success").removeClass("progress-info")
+        if data.real_usage < 85
+          $('.progress').addClass("progress-warning").removeClass("progress-info")
+        if data.real_usage < 80
+          $('.progress').addClass("progress-danger").removeClass("progress-warning progress-info")
+      , 800
+      line = "<pre class='prettyprint'>" + JSON.stringify(data, null, 2) + "</pre>"
+      $('.spinner').before(line)
+
+  socket.on 'progress', (data) ->
+    $('.progress .bar').css('width', data + "%")
+    if data is 100
+      setTimeout ->
+        $('.spinner').remove()
+        $('.progress').removeClass("progress-striped")
+      , 800
+
+
 
   new MainApp(el: $('body'), socket: socket)

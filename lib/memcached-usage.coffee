@@ -22,8 +22,17 @@ KB = exports.KB = (length) ->
   char
 
 run = exports.run = (values, reporter) ->
+  default_output_reporter = (data) -> console.log data
+  default_progress_reporter = (data) ->
   unless reporter?
-    reporter = (report) -> console.log report
+    reporter =
+      output: default_output_reporter
+      progress: default_progress_reporter
+  unless reporter.output
+    reporter.output = reporter if reporter
+  unless reporter.progress
+    reporter.progress = default_progress_reporter
+
   client = new memcached memcached_instance
   counters = {}
   report =
@@ -48,24 +57,24 @@ run = exports.run = (values, reporter) ->
       counter += 1
       counters[value.length] = counter
       if counter % 1000 == 0
-        if require.main == module
-          console.log counter + " keys added"
-        else
-          reporter counter + " keys added"
+        line = "INFO: " + counter + " keys added"
+        reporter.output line
       client.stats (err, result) ->
         throw err if err
         stats = result[0]
+        server_usage = Math.round(stats["bytes"] / stats["limit_maxbytes"] * 10000) / 100
+        reporter.progress server_usage if Math.floor(server_usage % 2) == 0
         return cb values, reporter if stats.evictions < 1
+        reporter.output "INFO: " + stats["total_items"] + " keys added, got first eviction"
         for length, count of counters
-          report.count[length] =
-            items: count
+          report.count[length] = items: count
           report.real_bytes += length * count
-
 
         report.total_items = stats["total_items"]
         report.server_bytes = stats["bytes"]
-        report.server_usage = Math.round(stats["bytes"] / stats["limit_maxbytes"] * 10000) / 100
+        report.server_usage = server_usage
         report.real_usage = Math.round(report.real_bytes / stats["limit_maxbytes"] * 10000) / 100
+
 
         client.slabs (err, result) ->
           slab = result[0]
@@ -77,8 +86,8 @@ run = exports.run = (values, reporter) ->
                 total_chunks: v.total_chunks
                 mem_requested: v.mem_requested
           report.active_slabs = v for k, v of slab.active_slabs
-          reporter(report)
-          reporter('DONE')
+          reporter.output report
+          reporter.progress 100
 
   client.connect memcached_instance, (err, result) ->
     throw err if err

@@ -15,9 +15,12 @@
 
     .span8
       .well
-        h3 Output
+        h3.output-header Output
         small Select scenario from left side, then you can see the output it generated.
         hr
+        .progress.progress-info.progress-striped.hidden
+          #progress.bar
+        #info
         #output(style="min-height: 400px;")
         a.back-to-top(href="#top")
           i.icon-circle-arrow-up
