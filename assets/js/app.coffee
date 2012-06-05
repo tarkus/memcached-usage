@@ -1,11 +1,3 @@
-class AnalysisOutput extends Spine.Model
-  @configure 'AnalysisOutput', 'scenario'
-  @extend Spine.Model.Ajax
-
-  fetch: ->
-    $.getJSON "/run/" + @scenario, (data) =>
-
-
 class MainApp extends Spine.Controller
   events:
     'click .scenario': 'run'
@@ -45,12 +37,10 @@ $ ->
     p = document.createElement('p')
     return $('.spinner').remove() if data.output is 'DONE'
     if typeof data.output is 'string'
-      line = data.output
-      p.innerHTML = "<pre>" + line + "</pre>"
+      line = "<pre>" + data.output + "</pre>"
     else if typeof data.output is 'object'
-      line = JSON.stringify(data.output, null, 2)
-      p.innerHTML = "<pre class='prettyprint'>" + line + "</pre>"
-    $('.spinner').before(p)
+      line = "<pre class='prettyprint'>" + JSON.stringify(data.output, null, 2) + "</pre>"
+    $('.spinner').before(line)
     $('body').animate scrollTop: $(p).offset().top - 100 + 'px', 400
 
   new MainApp(el: $('body'), socket: socket)
